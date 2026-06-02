@@ -1,0 +1,764 @@
+@page
+@model ASP.NetCore_Web_App.Pages.Contacts.IndexModel
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Contact Management";
+
+    // CSS gradient options for beautiful initial-based avatars
+    string[] avatarGradients = new string[]
+    {
+        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",   // Indigo-Purple
+        "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",   // Teal-Green
+        "linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)",   // Orange-Red
+        "linear-gradient(135deg, #ea00d9 0%, #711c91 100%)",   // Pink-DeepPurple
+        "linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)",   // Sky-Blue
+        "linear-gradient(135deg, #F2994A 0%, #F2C94C 100%)"    // Yellow-Orange
+    };
+
+    string GetAvatarGradient(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return avatarGradients[0];
+        int hash = Math.Abs(name.GetHashCode());
+        return avatarGradients[hash % avatarGradients.Length];
+    }
+}
+
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <h1 class="display-6 fw-bold mb-1 text-dark d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person-lines-fill text-primary me-3" viewBox="0 0 16 16">
+                    <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"/>
+                </svg>
+                Contact Directory
+            </h1>
+            <p class="text-muted mb-0">Securely organize, filter, and manage your connections.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <button class="btn btn-primary px-4 py-2 shadow-sm d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addContactModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-person-plus-fill me-2" viewBox="0 0 16 16">
+                    <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                    <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
+                </svg>
+                Add Contact
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm overflow-hidden h-100 position-relative bg-glass-card">
+                <div class="card-body py-3 px-4 d-flex align-items-center">
+                    <div class="stat-icon-wrapper bg-primary-gradient me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-people-fill text-white" viewBox="0 0 16 16">
+                            <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h6 class="text-muted small fw-semibold uppercase mb-1">Total</h6>
+                        <h3 class="fw-bold mb-0 text-dark">@Model.TotalContactsCount</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm overflow-hidden h-100 position-relative bg-glass-card">
+                <div class="card-body py-3 px-4 d-flex align-items-center">
+                    <div class="stat-icon-wrapper bg-success-gradient me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-house-heart-fill text-white" viewBox="0 0 16 16">
+                            <path d="M8 6.982C9.664 5.309 13.825 8.236 8 12 2.175 8.236 6.336 5.309 8 6.982"/>
+                            <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h6 class="text-muted small fw-semibold uppercase mb-1">Personal</h6>
+                        <h3 class="fw-bold mb-0 text-dark">@Model.PersonalContactsCount</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm overflow-hidden h-100 position-relative bg-glass-card">
+                <div class="card-body py-3 px-4 d-flex align-items-center">
+                    <div class="stat-icon-wrapper bg-indigo-gradient me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-briefcase-fill text-white" viewBox="0 0 16 16">
+                            <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v8A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5m1.886 6.914L15 7.151V12.5a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5V7.15l7.114 1.764a.5.5 0 0 0 .272 0"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h6 class="text-muted small fw-semibold uppercase mb-1">Work</h6>
+                        <h3 class="fw-bold mb-0 text-dark">@Model.WorkContactsCount</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm overflow-hidden h-100 position-relative bg-glass-card">
+                <div class="card-body py-3 px-4 d-flex align-items-center">
+                    <div class="stat-icon-wrapper bg-warning-gradient me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bookmark-star-fill text-white" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5M8.16 4.1a.178.178 0 0 0-.32 0l-.634 1.285a.18.18 0 0 1-.134.098l-1.42.206a.178.178 0 0 0-.1.305l1.028.994a.18.18 0 0 1 .05.158L5.7 8.544a.178.178 0 0 0 .258.187l1.27-.668a.18.18 0 0 1 .172 0l1.27.668a.178.178 0 0 0 .258-.187l-.242-1.408a.18.18 0 0 1 .05-.158l1.028-.994a.178.178 0 0 0-.1-.305l-1.42-.206a.18.18 0 0 1-.134-.098z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h6 class="text-muted small fw-semibold uppercase mb-1">Other</h6>
+                        <h3 class="fw-bold mb-0 text-dark">@Model.OtherContactsCount</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters Panel -->
+    <div class="card border-0 shadow-sm mb-4 bg-glass-card">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <!-- Search Query -->
+                <div class="col-md-5">
+                    <div class="input-group search-input-group">
+                        <span class="input-group-text border-0 bg-transparent ps-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search text-muted" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                            </svg>
+                        </span>
+                        <input type="text" name="SearchQuery" value="@Model.SearchQuery" class="form-control border-0 bg-transparent py-2.5" placeholder="Search by name, email, phone..." aria-label="Search contacts" />
+                        @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                        {
+                            <button type="button" class="btn border-0 bg-transparent text-muted" onclick="clearSearch()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Category Filters (Custom Styled Tabs) -->
+                <div class="col-md-5 d-flex flex-wrap gap-1 mt-2 mt-md-0">
+                    <input type="hidden" name="SelectedCategory" id="selectedCategoryInput" value="@Model.SelectedCategory" />
+                    <button type="button" onclick="selectCategory('All')" class="btn filter-btn @(string.IsNullOrEmpty(Model.SelectedCategory) || Model.SelectedCategory == "All" ? "active" : "")">All</button>
+                    <button type="button" onclick="selectCategory('Personal')" class="btn filter-btn @(Model.SelectedCategory == "Personal" ? "active" : "")">Personal</button>
+                    <button type="button" onclick="selectCategory('Work')" class="btn filter-btn @(Model.SelectedCategory == "Work" ? "active" : "")">Work</button>
+                    <button type="button" onclick="selectCategory('Other')" class="btn filter-btn @(Model.SelectedCategory == "Other" ? "active" : "")">Other</button>
+                </div>
+
+                <!-- Action Button -->
+                <div class="col-md-2 text-md-end mt-2 mt-md-0">
+                    <button type="submit" class="btn btn-secondary w-100 py-2 shadow-sm d-inline-flex align-items-center justify-content-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel-fill me-2" viewBox="0 0 16 16">
+                            <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.124.325L9 8.3v.538a.5.5 0 0 1-.17.372l-2 1.62A.5.5 0 0 1 6 10.75v-2.17l-4.376-4.8A.5.5 0 0 1 1.5 3.5z"/>
+                        </svg>
+                        Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    @if (!Model.Contacts.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 px-4 bg-glass-card mb-4">
+            <div class="card-body">
+                <div class="mb-4 text-muted">
+                    <div class="empty-state-icon mx-auto bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-journal-x text-muted" viewBox="0 0 16 16">
+                            <path d="M3 9.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/>
+                            <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m0 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                            <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 13.5 2zM1 3.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h4 class="fw-bold mb-2">No Contacts Found</h4>
+                @if (!string.IsNullOrEmpty(Model.SearchQuery) || (!string.IsNullOrEmpty(Model.SelectedCategory) && Model.SelectedCategory != "All"))
+                {
+                    <p class="text-muted mb-4 max-width-500 mx-auto">No results matched your search criteria. Try modifying your filters or clear the search.</p>
+                    <button class="btn btn-outline-primary px-4" onclick="resetFilters()">Reset Filters</button>
+                }
+                else
+                {
+                    <p class="text-muted mb-4 max-width-500 mx-auto">Your contact directory is currently empty. Get started by adding your first secure contact.</p>
+                    <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#addContactModal">Add Contact</button>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Contacts Grid -->
+        <div class="row g-4 mb-4">
+            @foreach (var contact in Model.Contacts)
+            {
+                string initials = (contact.FirstName.Length > 0 ? contact.FirstName[0].ToString() : "") +
+                                  (contact.LastName.Length > 0 ? contact.LastName[0].ToString() : "");
+                string fullName = $"{contact.FirstName} {contact.LastName}";
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm contact-card h-100 bg-glass-card">
+                        <div class="card-body p-4 position-relative">
+                            <!-- Category Badge -->
+                            <div class="position-absolute top-0 end-0 mt-4 me-4">
+                                @if (contact.Category == "Personal")
+                                {
+                                    <span class="badge badge-personal px-2.5 py-1.5 fw-semibold">Personal</span>
+                                }
+                                else if (contact.Category == "Work")
+                                {
+                                    <span class="badge badge-work px-2.5 py-1.5 fw-semibold">Work</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-other px-2.5 py-1.5 fw-semibold">Other</span>
+                                }
+                            </div>
+
+                            <!-- Avatar & Name -->
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="avatar-circle me-3" style="background: @GetAvatarGradient(fullName)">
+                                    <span class="avatar-initials text-white fw-bold">@initials.ToUpper()</span>
+                                </div>
+                                <div style="max-width: calc(100% - 70px);">
+                                    <h5 class="fw-bold mb-0 text-dark text-truncate" title="@fullName">@fullName</h5>
+                                    @if (!string.IsNullOrEmpty(contact.Company))
+                                    {
+                                        <small class="text-muted d-flex align-items-center mt-0.5 text-truncate" title="@contact.Company">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-building me-1" viewBox="0 0 16 16">
+                                                <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 8.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm-7 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
+                                            </svg>
+                                            @contact.Company
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-transparent d-block mt-0.5" style="user-select: none;">&nbsp;</small>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Contact Info Details -->
+                            <div class="contact-info-list mb-3">
+                                <a href="mailto:@contact.Email" class="contact-info-item text-decoration-none text-muted mb-2.5 d-flex align-items-center">
+                                    <div class="info-icon-circle bg-light me-2.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-envelope text-primary" viewBox="0 0 16 16">
+                                            <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-truncate">@contact.Email</span>
+                                </a>
+                                <a href="tel:@contact.Phone" class="contact-info-item text-decoration-none text-muted mb-2.5 d-flex align-items-center">
+                                    <div class="info-icon-circle bg-light me-2.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-telephone text-primary" viewBox="0 0 16 16">
+                                            <path d="M3.654 1.328a.678.678 0 0 0-1.88 0L.526 2.846a.713.713 0 0 0-.156.24C.018 3.822-.054 4.901.114 6c.23 1.482.932 2.9 2.018 3.986.04.04.08.078.122.115l.8.8a7 7 0 0 0 9.086.13l1.178-1.178a.678.678 0 0 0 0-.953l-1.587-1.586a.68.68 0 0 0-.94 0L10.92 7.78c-.28.28-.746.28-1.028 0L7.758 5.6C7.477 5.317 7.477 4.85 7.758 4.57L9.08 3.248a.68.68 0 0 0 0-.94L7.493.718a.68.68 0 0 0-.94 0zM12.184 8.75 10.582 7.15c-.29-.29-.769-.29-1.06 0L8.12 8.55c-.722.722-1.879.722-2.6 0L4.1 7.13c-.722-.722-.722-1.879 0-2.6L5.5 3.13c.29-.29.29-.769 0-1.06L3.898.47a.7.7 0 0 0-.97 0L1.758 1.644a.7.7 0 0 0-.18.252c-.37.76-.36 1.7.13 2.76.544 1.173 1.353 2.456 2.457 3.56 1.103 1.103 2.386 1.912 3.56 2.456 1.06.49 2 .5 2.76.13a.7.7 0 0 0 .252-.18L12.184 8.75z"/>
+                                        </svg>
+                                    </div>
+                                    <span>@contact.Phone</span>
+                                </a>
+                            </div>
+
+                            <!-- Notes (Collapsible or truncated) -->
+                            @if (!string.IsNullOrEmpty(contact.Notes))
+                            {
+                                <div class="contact-notes-box rounded bg-light p-2 mb-3">
+                                    <small class="text-muted d-block text-truncate-2" title="@contact.Notes">
+                                        @contact.Notes
+                                    </small>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="contact-notes-box-empty rounded bg-transparent p-2 mb-3" style="user-select: none;">
+                                    <small class="text-transparent d-block">&nbsp;</small>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Card Footer Operations -->
+                        <div class="card-footer bg-transparent border-top-0 px-4 pb-4 pt-0 d-flex justify-content-between">
+                            <button class="btn btn-outline-warning btn-sm px-3 rounded-pill d-inline-flex align-items-center" 
+                                    onclick="openEditModal(@contact.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(contact.FirstName))', '@Html.Raw(JavaScriptEncoder.Default.Encode(contact.LastName))', '@Html.Raw(JavaScriptEncoder.Default.Encode(contact.Email))', '@Html.Raw(JavaScriptEncoder.Default.Encode(contact.Phone))', '@Html.Raw(JavaScriptEncoder.Default.Encode(contact.Company ?? ""))', '@Html.Raw(JavaScriptEncoder.Default.Encode(contact.Category))', '@Html.Raw(JavaScriptEncoder.Default.Encode(contact.Notes ?? ""))')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-pencil-fill me-1.5" viewBox="0 0 16 16">
+                                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.5-.5V9h-.5a.5.5 0 0 1-.5-.5V8.5h-.5a.5.5 0 0 1-.5-.5V8h-.5a.5.5 0 0 1-.5-.5V7h-.5a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .146-.354l6.5-6.5 3.707 3.707-6.5 6.5a.5.5 0 0 1-.354.146h-3z"/>
+                                </svg>
+                                Edit
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm px-3 rounded-pill d-inline-flex align-items-center" onclick="openDeleteModal(@contact.Id, '@fullName')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-trash3-fill me-1.5" viewBox="0 0 16 16">
+                                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- ================= ADD CONTACT MODAL ================= -->
+<div class="modal fade" id="addContactModal" tabindex="-1" aria-labelledby="addContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg bg-glass-card">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center" id="addContactModalLabel">
+                    <div class="modal-title-icon bg-primary bg-opacity-10 me-2.5 rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-person-plus text-primary" viewBox="0 0 16 16">
+                            <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"/>
+                        </svg>
+                    </div>
+                    New Contact
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="AddContact">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                    <input type="hidden" name="SelectedCategory" value="@Model.SelectedCategory" />
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="form-floating mb-1">
+                                <input type="text" asp-for="ContactInput.FirstName" class="form-control" placeholder="First Name" required maxLength="50" id="addFirstName" />
+                                <label asp-for="ContactInput.FirstName">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating mb-1">
+                                <input type="text" asp-for="ContactInput.LastName" class="form-control" placeholder="Last Name" required maxLength="50" id="addLastName" />
+                                <label asp-for="ContactInput.LastName">Last Name</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <input type="email" asp-for="ContactInput.Email" class="form-control" placeholder="name@example.com" required maxLength="100" id="addEmail" />
+                                <label asp-for="ContactInput.Email">Email Address</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <input type="tel" asp-for="ContactInput.Phone" class="form-control" placeholder="Phone Number" required maxLength="20" id="addPhone" />
+                                <label asp-for="ContactInput.Phone">Phone Number</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <input type="text" asp-for="ContactInput.Company" class="form-control" placeholder="Company" maxLength="100" id="addCompany" />
+                                <label asp-for="ContactInput.Company">Company (Optional)</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <select asp-for="ContactInput.Category" class="form-select" id="addCategory">
+                                    <option value="Personal">Personal</option>
+                                    <option value="Work">Work</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <label asp-for="ContactInput.Category">Category</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="ContactInput.Notes" class="form-control" placeholder="Notes" style="height: 100px;" maxLength="500" id="addNotes"></textarea>
+                                <label asp-for="ContactInput.Notes">Notes (Optional)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 justify-content-between">
+                    <button type="button" class="btn btn-light px-4 py-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm">Save Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= EDIT CONTACT MODAL ================= -->
+<div class="modal fade" id="editContactModal" tabindex="-1" aria-labelledby="editContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg bg-glass-card">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center" id="editContactModalLabel">
+                    <div class="modal-title-icon bg-warning bg-opacity-10 me-2.5 rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-pencil-square text-warning" viewBox="0 0 16 16">
+                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                        </svg>
+                    </div>
+                    Edit Contact
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="EditContact">
+                <div class="modal-body p-4">
+                    <input type="hidden" asp-for="ContactInput.Id" id="editId" />
+                    <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                    <input type="hidden" name="SelectedCategory" value="@Model.SelectedCategory" />
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="form-floating mb-1">
+                                <input type="text" asp-for="ContactInput.FirstName" class="form-control" placeholder="First Name" required maxLength="50" id="editFirstName" />
+                                <label asp-for="ContactInput.FirstName">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating mb-1">
+                                <input type="text" asp-for="ContactInput.LastName" class="form-control" placeholder="Last Name" required maxLength="50" id="editLastName" />
+                                <label asp-for="ContactInput.LastName">Last Name</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <input type="email" asp-for="ContactInput.Email" class="form-control" placeholder="name@example.com" required maxLength="100" id="editEmail" />
+                                <label asp-for="ContactInput.Email">Email Address</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <input type="tel" asp-for="ContactInput.Phone" class="form-control" placeholder="Phone Number" required maxLength="20" id="editPhone" />
+                                <label asp-for="ContactInput.Phone">Phone Number</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <input type="text" asp-for="ContactInput.Company" class="form-control" placeholder="Company" maxLength="100" id="editCompany" />
+                                <label asp-for="ContactInput.Company">Company (Optional)</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating mb-1">
+                                <select asp-for="ContactInput.Category" class="form-select" id="editCategory">
+                                    <option value="Personal">Personal</option>
+                                    <option value="Work">Work</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <label asp-for="ContactInput.Category">Category</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="ContactInput.Notes" class="form-control" placeholder="Notes" style="height: 100px;" maxLength="500" id="editNotes"></textarea>
+                                <label asp-for="ContactInput.Notes">Notes (Optional)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 justify-content-between">
+                    <button type="button" class="btn btn-light px-4 py-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning text-dark fw-semibold px-4 py-2 shadow-sm">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= DELETE CONFIRMATION MODAL ================= -->
+<div class="modal fade" id="deleteContactModal" tabindex="-1" aria-labelledby="deleteContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg bg-glass-card">
+            <div class="modal-header border-0 pb-0 pt-4 px-4 justify-content-center">
+                <div class="delete-alert-icon bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-exclamation-triangle-fill text-danger" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <h5 class="fw-bold text-dark mb-2">Delete Contact?</h5>
+                <p class="text-muted small mb-0">Are you sure you want to delete <strong id="deleteContactName" class="text-dark"></strong>? This action cannot be undone.</p>
+            </div>
+            <form method="post" asp-page-handler="DeleteContact">
+                <input type="hidden" name="id" id="deleteId" />
+                <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+                <input type="hidden" name="SelectedCategory" value="@Model.SelectedCategory" />
+
+                <div class="modal-footer border-0 p-4 pt-0 justify-content-between">
+                    <button type="button" class="btn btn-light px-3.5 py-2 btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger px-3.5 py-2 btn-sm shadow-sm">Yes, Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= TOAST NOTIFICATION SYSTEM ================= -->
+@if (!string.IsNullOrEmpty(Model.StatusToast))
+{
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1085;">
+        <div id="statusToast" class="toast border-0 shadow-lg bg-glass-card" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+            <div class="toast-body p-3 d-flex align-items-center">
+                @if (Model.StatusToastType == "success")
+                {
+                    <div class="toast-icon bg-success-gradient text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 1.047-1.096l2.553 2.45L12.016 3.97a.733.733 0 0 1 .72-.03z"/>
+                        </svg>
+                    </div>
+                }
+                else if (Model.StatusToastType == "warning")
+                {
+                    <div class="toast-icon bg-warning-gradient text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                        </svg>
+                    </div>
+                }
+                else
+                {
+                    <div class="toast-icon bg-danger-gradient text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                        </svg>
+                    </div>
+                }
+                <div class="flex-grow-1">
+                    <span class="text-dark small fw-semibold">@Model.StatusToast</span>
+                </div>
+                <button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ================= STYLES ================= -->
+<style>
+    /* Premium CSS Tokens & Components */
+    .bg-glass-card {
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(220, 224, 230, 0.45) !important;
+    }
+
+    .bg-primary-gradient {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    }
+    .bg-success-gradient {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    }
+    .bg-indigo-gradient {
+        background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+    }
+    .bg-warning-gradient {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    }
+    .bg-danger-gradient {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    }
+
+    .stat-icon-wrapper {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    /* Custom Category Badges */
+    .badge-personal {
+        background: rgba(16, 185, 129, 0.1) !important;
+        color: #047857 !important;
+    }
+    .badge-work {
+        background: rgba(37, 99, 235, 0.1) !important;
+        color: #1d4ed8 !important;
+    }
+    .badge-other {
+        background: rgba(245, 158, 11, 0.1) !important;
+        color: #b45309 !important;
+    }
+
+    /* Avatar Initials Bubble */
+    .avatar-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        border: 2px solid #fff;
+    }
+    .avatar-initials {
+        font-size: 1.15rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Search Input Styling */
+    .search-input-group {
+        background: #fff;
+        border: 1px solid rgba(220, 224, 230, 0.7);
+        border-radius: 30px;
+        transition: all 0.25s ease-in-out;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .search-input-group:focus-within {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), inset 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .search-input-group input:focus {
+        box-shadow: none !important;
+    }
+
+    /* Filter Buttons Styling */
+    .filter-btn {
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #64748b;
+        background: transparent;
+        border: 1px solid transparent;
+        transition: all 0.2s ease-in-out;
+    }
+    .filter-btn:hover {
+        color: #334155;
+        background: rgba(226, 232, 240, 0.5);
+    }
+    .filter-btn.active {
+        color: #4f46e5;
+        background: rgba(79, 70, 229, 0.08);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    /* Contact Cards */
+    .contact-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        border-radius: 16px !important;
+    }
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.12) !important;
+    }
+
+    .info-icon-circle {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+    }
+    .contact-info-item:hover .info-icon-circle {
+        background-color: rgba(99, 102, 241, 0.08) !important;
+    }
+    .contact-info-item {
+        font-size: 0.9rem;
+        transition: color 0.2s ease;
+    }
+    .contact-info-item:hover {
+        color: #4f46e5 !important;
+    }
+
+    .mb-2.5 {
+        margin-bottom: 0.625rem;
+    }
+    .me-2.5 {
+        margin-right: 0.625rem;
+    }
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.4;
+    }
+    .contact-notes-box {
+        min-height: 48px;
+    }
+    .contact-notes-box-empty {
+        min-height: 48px;
+    }
+
+    /* Modal Form Customization */
+    .form-control:focus, .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+    .modal-content {
+        border-radius: 20px !important;
+        overflow: hidden;
+    }
+
+    /* Styling general utilities */
+    .uppercase {
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+    }
+    .max-width-500 {
+        max-width: 500px;
+    }
+
+    /* Toasts float animation */
+    .toast {
+        border-radius: 12px !important;
+    }
+</style>
+
+<!-- ================= SCRIPTS ================= -->
+@section Scripts {
+    <script>
+        // Initialize success toast on load if exists
+        document.addEventListener('DOMContentLoaded', function () {
+            var toastEl = document.getElementById('statusToast');
+            if (toastEl) {
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        });
+
+        // Search clear action
+        function clearSearch() {
+            var searchInput = document.querySelector('input[name="SearchQuery"]');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.form.submit();
+            }
+        }
+
+        // Category filter tab selection
+        function selectCategory(category) {
+            document.getElementById('selectedCategoryInput').value = category;
+            document.getElementById('selectedCategoryInput').form.submit();
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            var searchInput = document.querySelector('input[name="SearchQuery"]');
+            if (searchInput) searchInput.value = '';
+            document.getElementById('selectedCategoryInput').value = 'All';
+            document.getElementById('selectedCategoryInput').form.submit();
+        }
+
+        // Open Edit Modal and prefill properties
+        function openEditModal(id, firstName, lastName, email, phone, company, category, notes) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editFirstName').value = firstName;
+            document.getElementById('editLastName').value = lastName;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editPhone').value = phone;
+            document.getElementById('editCompany').value = company;
+            document.getElementById('editCategory').value = category;
+            document.getElementById('editNotes').value = notes;
+
+            var editModal = new bootstrap.Modal(document.getElementById('editContactModal'));
+            editModal.show();
+        }
+
+        // Open Delete Modal
+        function openDeleteModal(id, name) {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteContactName').textContent = name;
+
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteContactModal'));
+            deleteModal.show();
+        }
+    </script>
+}

@@ -7,6 +7,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# Visual Studio
+**/[Vv]s/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -55,3 +58,14 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# SQLite local database files
+*.db
+*.db-shm
+*.db-wal
+
+# Visual Studio user-specific files
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
