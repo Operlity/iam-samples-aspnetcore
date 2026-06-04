@@ -10,17 +10,19 @@ public class LogoutModel : PageModel
 {
     public async Task<IActionResult> OnGetAsync()
     {
-        // Sign out locally by clearing the session cookie
+        // Default Sign Out: local app sign-out and redirect directly to login
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        
-        return RedirectToPage("/SignedOut");
+        return RedirectToPage("/Login", new { returnUrl = "/Welcome", forceLogin = true });
     }
 
     public IActionResult OnGetCentral()
     {
-        // Sign out centrally from both local cookie and OIDC Identity Provider
+        // Optional: central sign-out at Identity Provider
         return SignOut(
-            new AuthenticationProperties { RedirectUri = "/" },
+            new AuthenticationProperties
+            {
+                RedirectUri = Url.Page("/Login", new { returnUrl = "/Welcome", forceLogin = true }) ?? "/Login?returnUrl=%2FWelcome&forceLogin=true"
+            },
             CookieAuthenticationDefaults.AuthenticationScheme,
             OpenIdConnectDefaults.AuthenticationScheme
         );
